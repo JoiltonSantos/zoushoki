@@ -1,23 +1,45 @@
 package com.zoushoki.entity;
 
 public class MangaLista {
-    private String titulo;
+    private Manga manga;
     private int codigoStatus;
     private int quantidadeVolumesLidos;
     private boolean favorito;
     private double nota;
 
-    public MangaLista(String titulo, int codigoStatus, int quantidadeVolumesLidos, boolean favorito, double nota) {
-        this.titulo = titulo;
+    public MangaLista(Manga manga, int codigoStatus, int quantidadeVolumesLidos, boolean favorito, double nota) {
+        this.manga = manga;
         this.codigoStatus = codigoStatus;
         this.quantidadeVolumesLidos = quantidadeVolumesLidos;
         this.favorito = favorito;
         this.nota = nota;
     }
 
+    public Manga getManga() {
+        return manga;
+    }
+
+    public int getCodigoStatus() {
+        return codigoStatus;
+    }
+
+    public int getQuantidadeVolumesLidos() {
+        return quantidadeVolumesLidos;
+    }
+
+    public boolean isFavorito() {
+        return favorito;
+    }
+
+    public double getNota() {
+        return nota;
+    }
+
     public void exibirInformacoes() {
         System.out.println("\n=== INFORMAÇÕES DO MANGÁ ===");
-        System.out.println("Título: " + titulo);
+        System.out.println("Título: " + manga.getTitulo());
+        System.out.println("Autor: " + manga.getAutor());
+        System.out.println("Total de Volumes: " + manga.getTotalVolumes());
         System.out.println("Status: " + calcularStatus());
         System.out.println("Quantidade de Volumes Lidos: " + quantidadeVolumesLidos);
         System.out.println("Nota: " + nota);
