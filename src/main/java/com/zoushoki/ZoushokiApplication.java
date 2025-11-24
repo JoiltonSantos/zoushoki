@@ -3,6 +3,9 @@ package com.zoushoki;
 import com.zoushoki.data.CatalogoMangaData;
 import com.zoushoki.entity.Manga;
 import com.zoushoki.entity.MangaLista;
+import com.zoushoki.entity.Usuario;
+import com.zoushoki.enums.StatusLeitura;
+import com.zoushoki.enums.StatusManga;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
@@ -13,13 +16,18 @@ import java.util.Scanner;
 public class ZoushokiApplication {
 
     private static ArrayList<Manga> catalogo = new ArrayList<>();
-    private static ArrayList<MangaLista> minhaLista = new ArrayList<>();
+    private static Usuario usuario;
     private static Scanner scanner = new Scanner(System.in);
 
     public static void main(String[] args) {
         SpringApplication.run(ZoushokiApplication.class, args);
 
         catalogo = CatalogoMangaData.inicializar();
+
+        System.out.print("Digite seu nome: ");
+        String nomeUsuario = scanner.nextLine();
+        usuario = new Usuario(nomeUsuario);
+        System.out.println("\nBem-vindo(a), " + usuario.getNome() + "!\n");
 
         int opcao;
         do {
@@ -39,6 +47,7 @@ public class ZoushokiApplication {
                     break;
                 case 0:
                     System.out.println("\nEncerrando...");
+                    System.out.println(usuario);
                     break;
                 default:
                     System.out.println("\nOpção inválida! Tente novamente.");
@@ -76,6 +85,8 @@ public class ZoushokiApplication {
 
         MangaLista mangaExistente = null;
         int indiceMangaExistente = -1;
+        ArrayList<MangaLista> minhaLista = usuario.getMinhaLista();
+
         for (int i = 0; i < minhaLista.size(); i++) {
             if (minhaLista.get(i).getManga().getTitulo().equals(mangaSelecionado.getTitulo())) {
                 mangaExistente = minhaLista.get(i);
@@ -98,9 +109,11 @@ public class ZoushokiApplication {
             return;
         }
 
-        if (codigoStatus == 3) {
-            String statusManga = mangaSelecionado.getStatusManga();
-            if (statusManga.equals("Em Lançamento") || statusManga.equals("Hiato")) {
+        StatusLeitura statusLeitura = StatusLeitura.fromCodigo(codigoStatus);
+
+        if (statusLeitura == StatusLeitura.COMPLETO) {
+            StatusManga statusManga = mangaSelecionado.getStatusManga();
+            if (statusManga == StatusManga.EM_LANCAMENTO || statusManga == StatusManga.HIATO) {
                 System.out.println("\nEste mangá está em " + statusManga + " e não pode ser marcado como Completo!");
                 return;
             }
@@ -110,9 +123,9 @@ public class ZoushokiApplication {
         double nota = 0.0;
         boolean favorito = false;
 
-        if (codigoStatus == 3) {
+        if (statusLeitura == StatusLeitura.COMPLETO) {
             quantidadeVolumesLidos = mangaSelecionado.getTotalVolumes();
-        } else if (codigoStatus == 2 || codigoStatus == 4 || codigoStatus == 5) {
+        } else if (statusLeitura == StatusLeitura.LENDO || statusLeitura == StatusLeitura.EM_ESPERA || statusLeitura == StatusLeitura.ABANDONADO) {
             boolean volumesValido = false;
             do {
                 System.out.print("Digite a quantidade de volumes lidos: ");
@@ -128,7 +141,7 @@ public class ZoushokiApplication {
             } while (!volumesValido);
         }
 
-        if (codigoStatus == 2 || codigoStatus == 3 || codigoStatus == 4 || codigoStatus == 5) {
+        if (statusLeitura != StatusLeitura.PRETENDO_LER) {
             boolean notaValida = false;
             do {
                 System.out.print("Digite a nota (0.0 a 10.0): ");
@@ -142,7 +155,7 @@ public class ZoushokiApplication {
             } while (!notaValida);
         }
 
-        if (codigoStatus == 2 || codigoStatus == 3 || codigoStatus == 4) {
+        if (statusLeitura == StatusLeitura.LENDO || statusLeitura == StatusLeitura.COMPLETO || statusLeitura == StatusLeitura.EM_ESPERA) {
             boolean favoritoValido = false;
             do {
                 try {
@@ -156,23 +169,23 @@ public class ZoushokiApplication {
             } while (!favoritoValido);
         }
 
-        if (codigoStatus == 1 && (quantidadeVolumesLidos > 0 || nota > 0.0)) {
+        if (statusLeitura == StatusLeitura.PRETENDO_LER && (quantidadeVolumesLidos > 0 || nota > 0.0)) {
             System.out.println("\nStatus 'Pretendo Ler' não pode ter volumes lidos ou nota!");
             return;
         }
 
-        if (codigoStatus == 5 && favorito) {
+        if (statusLeitura == StatusLeitura.ABANDONADO && favorito) {
             System.out.println("\nMangás abandonados não podem ser favoritos!");
             return;
         }
 
-        MangaLista mangaLista = new MangaLista(mangaSelecionado, codigoStatus, quantidadeVolumesLidos, favorito, nota);
+        MangaLista mangaLista = new MangaLista(mangaSelecionado, statusLeitura, quantidadeVolumesLidos, favorito, nota);
 
         if (mangaExistente != null) {
             minhaLista.set(indiceMangaExistente, mangaLista);
             System.out.println("\n" + mangaSelecionado.getTitulo() + " atualizado na lista!");
         } else {
-            minhaLista.add(mangaLista);
+            usuario.adicionarManga(mangaLista);
             System.out.println("\n" + mangaSelecionado.getTitulo() + " adicionado à lista!");
         }
 
@@ -180,6 +193,8 @@ public class ZoushokiApplication {
     }
 
     private static void listarMangasLista() {
+        ArrayList<MangaLista> minhaLista = usuario.getMinhaLista();
+
         if (minhaLista.size() == 0) {
             System.out.println("\nSua lista está vazia!");
             return;
@@ -193,6 +208,8 @@ public class ZoushokiApplication {
     }
 
     private static void exibirEstatisticas() {
+        ArrayList<MangaLista> minhaLista = usuario.getMinhaLista();
+
         if (minhaLista.size() == 0) {
             System.out.println("\nSua lista está vazia!");
             return;
@@ -211,15 +228,15 @@ public class ZoushokiApplication {
         for (int i = 0; i < minhaLista.size(); i++) {
             MangaLista ml = minhaLista.get(i);
 
-            if (ml.getCodigoStatus() == 1) {
+            if (ml.getStatusLeitura() == StatusLeitura.PRETENDO_LER) {
                 totalPretendoLer++;
-            } else if (ml.getCodigoStatus() == 2) {
+            } else if (ml.getStatusLeitura() == StatusLeitura.LENDO) {
                 totalLendo++;
-            } else if (ml.getCodigoStatus() == 3) {
+            } else if (ml.getStatusLeitura() == StatusLeitura.COMPLETO) {
                 totalCompleto++;
-            } else if (ml.getCodigoStatus() == 4) {
+            } else if (ml.getStatusLeitura() == StatusLeitura.EM_ESPERA) {
                 totalEmEspera++;
-            } else if (ml.getCodigoStatus() == 5) {
+            } else if (ml.getStatusLeitura() == StatusLeitura.ABANDONADO) {
                 totalAbandonado++;
             }
 
@@ -239,6 +256,7 @@ public class ZoushokiApplication {
         double percentualFavoritos = (totalFavoritos * 100.0) / minhaLista.size();
 
         System.out.println("\n========== ESTATÍSTICAS ==========");
+        System.out.println("Usuário: " + usuario.getNome());
         System.out.println("Total de mangás na lista: " + minhaLista.size());
         System.out.println("\nStatus:");
         System.out.println("  Pretendo Ler: " + totalPretendoLer);

@@ -17,3 +17,13 @@ A segunda etapa evoluiu o projeto para uma aplicação interativa, implementando
 * **Menu Interativo:** O loop principal da aplicação foi reescrito usando `do-while` para manter o programa em execução. Uma estrutura `switch-case` foi usada para criar o menu principal, e o `break` é usado para finalizar cada caso.
 * **Tomada de Decisão:** Foram usadas estruturas `if`, `else if` e operadores lógicos (`||`, `&&`) para criar às validações necessárias.
 * **Laços de Repetição:** Loops `for` são usados para iterar sobre o catálogo de mangás e a lista do usuário. Loops `do-while` garantem que o usuário forneça entradas válidas antes de continuar.
+
+## Feature 3: Programação Orientada a Objetos
+
+Na terceira etapa, o projeto foi reestruturado seguindo os pilares da Programação Orientada a Objetos.
+
+* **Enums:** Foram criados três enums: `StatusLeitura` (com códigos numéricos 1-5), `StatusManga` (EM_LANCAMENTO, HIATO, CONCLUIDO) e `GeneroManga` (ACAO, AVENTURA, COMEDIA, DRAMA, etc.). O enum `StatusLeitura` possui um método `fromCodigo()` para conversão direta de int para enum.
+* **Nova Classe e Relacionamentos:** Foi criada a classe `Usuario` que possui um relacionamento um-para-muitos com `MangaLista` através de um `ArrayList`.
+* **Construtores Sobrecarregados:** Todas as classes principais possuem múltiplos construtores, demonstrando sobrecarga de métodos.
+* **Encapsulamento:** Todos os atributos são privados, com getters e setters implementados. Os setters contêm validações de regras de negócio, como impedir volumes negativos, notas fora da faixa 0-10, e regras específicas como mangás abandonados não poderem ser favoritos.
+* **Método toString():** Implementado em todas as classes seguindo um padrão consistente.
