@@ -1,15 +1,28 @@
 package com.zoushoki.entity;
 
+import com.zoushoki.enums.StatusLeitura;
+
 public class MangaLista {
     private Manga manga;
-    private int codigoStatus;
+    private StatusLeitura statusLeitura;
     private int quantidadeVolumesLidos;
     private boolean favorito;
     private double nota;
 
-    public MangaLista(Manga manga, int codigoStatus, int quantidadeVolumesLidos, boolean favorito, double nota) {
+    public MangaLista() {
+    }
+
+    public MangaLista(Manga manga) {
+        this(manga, StatusLeitura.PRETENDO_LER, 0, false, 0.0);
+    }
+
+    public MangaLista(Manga manga, StatusLeitura statusLeitura) {
+        this(manga, statusLeitura, 0, false, 0.0);
+    }
+
+    public MangaLista(Manga manga, StatusLeitura statusLeitura, int quantidadeVolumesLidos, boolean favorito, double nota) {
         this.manga = manga;
-        this.codigoStatus = codigoStatus;
+        this.statusLeitura = statusLeitura;
         this.quantidadeVolumesLidos = quantidadeVolumesLidos;
         this.favorito = favorito;
         this.nota = nota;
@@ -19,8 +32,8 @@ public class MangaLista {
         return manga;
     }
 
-    public int getCodigoStatus() {
-        return codigoStatus;
+    public StatusLeitura getStatusLeitura() {
+        return statusLeitura;
     }
 
     public int getQuantidadeVolumesLidos() {
@@ -35,29 +48,60 @@ public class MangaLista {
         return nota;
     }
 
+    public void setManga(Manga manga) {
+        this.manga = manga;
+    }
+
+    public void setStatusLeitura(StatusLeitura statusLeitura) {
+        this.statusLeitura = statusLeitura;
+    }
+
+    public void setQuantidadeVolumesLidos(int quantidadeVolumesLidos) {
+        if (quantidadeVolumesLidos >= 0 && quantidadeVolumesLidos <= manga.getTotalVolumes()) {
+            this.quantidadeVolumesLidos = quantidadeVolumesLidos;
+        }
+    }
+
+    public void setFavorito(boolean favorito) {
+        if (statusLeitura != StatusLeitura.ABANDONADO) {
+            this.favorito = favorito;
+        }
+    }
+
+    public void setNota(double nota) {
+        if (nota >= 0.0 && nota <= 10.0 && statusLeitura != StatusLeitura.PRETENDO_LER) {
+            this.nota = nota;
+        }
+    }
+
+    @Override
+    public String toString() {
+        return manga.getTitulo() + " | " + statusLeitura + " | " + quantidadeVolumesLidos + "/" + manga.getTotalVolumes() + " volumes";
+    }
+
     public void exibirInformacoes() {
         System.out.println("\n=== INFORMAÇÕES DO MANGÁ ===");
         System.out.println("Título: " + manga.getTitulo());
         System.out.println("Autor: " + manga.getAutor());
         System.out.println("Total de Volumes: " + manga.getTotalVolumes());
-        System.out.println("Status: " + calcularStatus());
+        System.out.println("Status: " + getStatusTexto());
         System.out.println("Quantidade de Volumes Lidos: " + quantidadeVolumesLidos);
         System.out.println("Nota: " + nota);
         System.out.println("Favorito: " + (favorito ? "Sim" : "Não"));
         System.out.println("============================\n");
     }
 
-    private String calcularStatus() {
-        switch (codigoStatus) {
-            case 1:
+    private String getStatusTexto() {
+        switch (statusLeitura) {
+            case PRETENDO_LER:
                 return "Pretendo Ler";
-            case 2:
+            case LENDO:
                 return "Lendo";
-            case 3:
+            case COMPLETO:
                 return "Completo";
-            case 4:
+            case EM_ESPERA:
                 return "Em Espera";
-            case 5:
+            case ABANDONADO:
                 return "Abandonado";
             default:
                 return "Status Desconhecido";
